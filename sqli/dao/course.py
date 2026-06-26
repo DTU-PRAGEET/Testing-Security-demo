@@ -28,13 +28,13 @@ class Course(NamedTuple):
         q = 'SELECT id, title, description FROM courses'
         params = {}
         if limit is not None:
-            q += ' LIMIT + %(limit)s '
+            q += ' LIMIT %(limit)s '
             params['limit'] = limit
         if offset is not None:
-            q += ' OFFSET + %(offset)s '
+            q += ' OFFSET %(offset)s '
             params['offset'] = offset
         async with conn.cursor() as cur:
-            await cur.execute(q, **params)
+            await cur.execute(q, params)
             result = await cur.fetchall()
             return [Course.from_raw(r) for r in result]
 
