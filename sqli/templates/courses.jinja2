@@ -1,5 +1,7 @@
 {% extends 'base.jinja2' %}
 
+{# Security note: this template relies on Jinja2 autoescape being enabled to prevent XSS in rendered course fields. #}
+
 {% block title %}Courses{% endblock %}
 
 {% block breadcrumbs %}
