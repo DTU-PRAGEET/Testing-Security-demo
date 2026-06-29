@@ -2,5 +2,5 @@
 .idea/
 *.pyc
 __pycache__/
-.README.rst
-.SECURITY_EVALUATION_GUIDE.md
+README.rst
+SECURITY_EVALUATION_GUIDE.md

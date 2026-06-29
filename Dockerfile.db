@@ -2,3 +2,4 @@ FROM postgres:9.6.15-alpine
 
 ENV POSTGRES_DB sqli
 COPY ./migrations/* /docker-entrypoint-initdb.d/
+# ldsck
