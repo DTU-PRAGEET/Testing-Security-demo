@@ -1,4 +1,6 @@
-from hashlib import md5
+import base64
+import hashlib
+import hmac
 from typing import NamedTuple, Optional
 
 from aiopg import Connection
@@ -38,4 +40,24 @@ class User(NamedTuple):
             return User.from_raw(await cur.fetchone())
 
     def check_password(self, password: str):
-        return self.pwd_hash == md5(password.encode('utf-8')).hexdigest()
+        """Verify password.
+
+        Supports upgraded hashes of the form:
+          pbkdf2_sha256$<iterations>$<salt_b64>$<dk_b64>
+        Falls back to legacy unsalted MD5 hex for backward compatibility.
+        """
+        stored = self.pwd_hash or ''
+        if stored.startswith('pbkdf2_sha256$'):
+            try:
+                _alg, iters_s, salt_b64, dk_b64 = stored.split('$', 3)
+                iters = int(iters_s)
+                salt = base64.b64decode(salt_b64.encode('ascii'))
+                dk_expected = base64.b64decode(dk_b64.encode('ascii'))
+            except Exception:
+                return False
+            dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, iters)
+            return hmac.compare_digest(dk, dk_expected)
+
+        # INTENT:SPACE-129069-upgrade-password-hash
+        legacy_md5 = hashlib.md5(password.encode('utf-8')).hexdigest()
+        return hmac.compare_digest(stored, legacy_md5)

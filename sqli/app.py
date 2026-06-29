@@ -5,7 +5,7 @@ from aiohttp_jinja2 import setup as setup_jinja
 from jinja2.loaders import PackageLoader
 from trafaret_config import commandline
 
-from sqli.middlewares import session_middleware, error_middleware
+from sqli.middlewares import session_middleware, csrf_middleware, error_middleware
 from sqli.schema.config import CONFIG_SCHEMA
 from sqli.services.db import setup_database
 from sqli.services.redis import setup_redis
@@ -24,7 +24,7 @@ def init(argv):
         debug=True,
         middlewares=[
             session_middleware,
-            # csrf_middleware,
+            csrf_middleware,  # INTENT:SPACE-129069-enable-csrf-middleware
             error_middleware,
         ]
     )
@@ -32,7 +32,7 @@ def init(argv):
 
     setup_jinja(app, loader=PackageLoader('sqli', 'templates'),
                 context_processors=[csrf_processor, auth_user_processor],
-                autoescape=False)
+                autoescape=True)  # INTENT:SPACE-129069-enable-jinja-autoescape
     setup_database(app)
     setup_redis(app)
     setup_routes(app)
