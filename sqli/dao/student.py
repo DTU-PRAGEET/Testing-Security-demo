@@ -40,8 +40,8 @@ class Student(NamedTuple):
     @staticmethod
     async def create(conn: Connection, name: str):
         q = ("INSERT INTO students (name) "
-             "VALUES ('%(name)s')" % {'name': name})
+             "VALUES (%s)")  # SECURITY_HARDENING_SPACE_129069: parameterized insert to prevent SQLi
         async with conn.cursor() as cur:
-            await cur.execute(q)
+            await cur.execute(q, (name,))
 
 
